@@ -10,7 +10,7 @@ if (!defined('LYCHEE')) exit('Error: Direct access is not allowed!');
 $version = '';
 
 #Add the sessions table
-$query = Database::prepare($database, "CREATE TABLE `lychee_sessions` (`value` varchar(40) DEFAULT NULL,`expires` int(11) DEFAULT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8;", array());
+$query = Database::prepare($database, "CREATE TABLE `?` (`value` varchar(40) DEFAULT NULL,`expires` int(11) DEFAULT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8;", array(LYCHEE_TABLE_SESSIONS));
 $result = $database->query($query);
 if (!$result){
 	Log::error($database, 'update_' . $version, __LINE__, 'Could not add the session table (' . $database->error . ')');
