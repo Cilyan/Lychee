@@ -48,6 +48,8 @@ function defineTablePrefix($dbTablePrefix) {
 	define('LYCHEE_TABLE_PHOTOS', $dbTablePrefix . 'lychee_photos');
 	define('LYCHEE_TABLE_SETTINGS', $dbTablePrefix . 'lychee_settings');
 	define('LYCHEE_TABLE_SESSIONS', $dbTablePrefix . 'lychee_sessions');
+	define('LYCHEE_TABLE_USERS', $dbTablePrefix . 'lychee_users');
+	define('LYCHEE_TABLE_PRIVILEGES', $dbTablePrefix . 'lychee_privileges');
 
 }
 

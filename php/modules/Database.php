@@ -31,7 +31,7 @@ class Database extends Module {
 			if (!Database::createDatabase($database, $name)) exit('Error: Could not create database!');
 
 		# Check tables
-		$query = Database::prepare($database, 'SELECT * FROM ?, ?, ?, ? LIMIT 0', array(LYCHEE_TABLE_PHOTOS, LYCHEE_TABLE_ALBUMS, LYCHEE_TABLE_SETTINGS, LYCHEE_TABLE_LOG, LYCHEE_TABLE_SESSIONS));
+		$query = Database::prepare($database, 'SELECT * FROM ?, ?, ?, ? LIMIT 0', array(LYCHEE_TABLE_PHOTOS, LYCHEE_TABLE_ALBUMS, LYCHEE_TABLE_SETTINGS, LYCHEE_TABLE_LOG, LYCHEE_TABLE_SESSIONS, LYCHEE_TABLE_USERS, LYCHEE_TABLE_PRIVILEGES));
 		if (!$database->query($query))
 			if (!Database::createTables($database)) exit('Error: Could not create tables!');
 
@@ -252,10 +252,94 @@ if(!defined('LYCHEE')) exit('Error: Direct access is not allowed!');
 
 		}
 
+		# Create sessions
+		$exist = Database::prepare($database, 'SELECT * FROM ? LIMIT 0', array(LYCHEE_TABLE_SESSIONS));
+		if (!$database->query($exist)) {
+
+			# Read file
+			$file	= __DIR__ . '/../database/sessions_table.sql';
+			$query	= @file_get_contents($file);
+
+			if (!isset($query)||$query===false) {
+				Log::error($database, __METHOD__, __LINE__, 'Could not load query for lychee_photos');
+				return false;
+			}
+
+			# Create table
+			$query = Database::prepare($database, $query, array(LYCHEE_TABLE_SESSIONS));
+			if (!$database->query($query)) {
+				Log::error($database, __METHOD__, __LINE__, $database->error);
+				return false;
+			}
+
+		}
+
+		# Create users
+		$exist = Database::prepare($database, 'SELECT * FROM ? LIMIT 0', array(LYCHEE_TABLE_USERS));
+		if (!$database->query($exist)) {
+
+			# Read file
+			$file	= __DIR__ . '/../database/users_table.sql';
+			$query	= @file_get_contents($file);
+
+			if (!isset($query)||$query===false) {
+				Log::error($database, __METHOD__, __LINE__, 'Could not load query for lychee_users');
+				return false;
+			}
+
+			# Create table
+			$query = Database::prepare($database, $query, array(LYCHEE_TABLE_USERS));
+			if (!$database->query($query)) {
+				Log::error($database, __METHOD__, __LINE__, $database->error);
+				return false;
+			}
+
+		}
+
+		# Create privileges
+		$exist = Database::prepare($database, 'SELECT * FROM ? LIMIT 0', array(LYCHEE_TABLE_PRIVILEGES));
+		if (!$database->query($exist)) {
+
+			# Read file
+			$file	= __DIR__ . '/../database/privileges_table.sql';
+			$query	= @file_get_contents($file);
+
+			if (!isset($query)||$query===false) {
+				Log::error($database, __METHOD__, __LINE__, 'Could not load query for lychee_privileges');
+				return false;
+			}
+
+			# Create table
+			$query = Database::prepare($database, $query, array(LYCHEE_TABLE_PRIVILEGES, LYCHEE_TABLE_PRIVILEGES, LYCHEE_TABLE_ALBUMS, LYCHEE_TABLE_USERS ));
+			if (!$database->query($query)) {
+				Log::error($database, __METHOD__, __LINE__, $database->error);
+				return false;
+			}
+
+			# Read file
+			$file	= __DIR__ . '/../database/privileges_table_connect.sql';
+			$query	= @file_get_contents($file);
+
+			if (!isset($query)||$query===false) {
+				Log::error($database, __METHOD__, __LINE__, 'Could not load alter query for lychee_privileges');
+				return false;
+			}
+
+			# Create table
+			$query = Database::prepare($database, $query, array(LYCHEE_TABLE_PRIVILEGES, LYCHEE_TABLE_ALBUMS, LYCHEE_TABLE_USERS ));
+			if (!$database->query($query)) {
+				Log::error($database, __METHOD__, __LINE__, $database->error);
+				return false;
+			}
+
+		}
+
+
+
+
 		return true;
 
 	}
-
 	static function setVersion($database, $version) {
 
 		$query	= Database::prepare($database, "UPDATE ? SET value = '?' WHERE `key` = 'version'", array(LYCHEE_TABLE_SETTINGS, $version));
