@@ -109,16 +109,17 @@ class Session extends Module {
 		# Call plugins
 		$this->plugins(__METHOD__, 0, func_get_args());
 
-		$username = crypt($username, $this->settings['username']);
-		$password = crypt($password, $this->settings['password']);
 
-		if ($this->settings['username']===$username&&
-			$this->settings['password']===$password) {
+    # Check the login
+    $users = new Users($this->database);
+
+		if ($users->checkLogin($username,$password)) {
 				$_SESSION['login']		= true;
 				$_SESSION['identifier']	= $this->settings['identifier'];
+				$_SESSION['username']	= $username;
 
 				$expire = time() + 60 * $this->settings['sessionLength'];
-				$hash = hash("sha1", $expire.$this->settings['identifier'].$this->settings['username'].$this->settings['password']);
+				$hash = hash("sha1", $expire.$this->settings['identifier'].$username.$password);
 				$query = Database::prepare($this->database, "INSERT INTO ? (value, expires) VALUES ('?', ?)", array(LYCHEE_TABLE_SESSIONS, $hash, $expire));
 				$result = $this->database->query($query);
 
@@ -127,7 +128,7 @@ class Session extends Module {
 				return true;
 		}
 
-		# No login
+  	# No login
 		if ($this->noLogin()===true) return true;
 
 		# Call plugins
@@ -143,11 +144,20 @@ class Session extends Module {
 		self::dependencies(isset($this->settings));
 
 		# Check if login credentials exist and login if they don't
+    $query = Database::prepare($this->database, "SELECT * FROM ?", array(LYCHEE_TABLE_USERS));
+    $result = $this->database->query($query);
+		if($result->num_rows === 0) {
+				$_SESSION['login']		= true;
+				$_SESSION['identifier']	= $this->settings['identifier'];
+				return true;
+		}
+    /*
 		if($this->settings['username']==='' && $this->settings['password']==='') {
 				$_SESSION['login']		= true;
 				$_SESSION['identifier']	= $this->settings['identifier'];
 				return true;
 		}
+     */
 
 		return false;
 
