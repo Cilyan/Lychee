@@ -27,8 +27,7 @@ contextMenu.settings = function(e) {
 
 	let items = [
 		{ type: 'item', title: build.iconic('person') + 'Change Password', fn: users.changePassword },
-		{ type: 'item', title: build.iconic('person') + 'Add User', fn: users.addUser },
-		{ type: 'item', title: build.iconic('person') + 'Delete User', fn: users.deleteUser },
+		{ type: 'item', title: build.iconic('person') + 'Manage Users', fn: users.manageUsers },
 		{ type: 'item', title: build.iconic('sort-ascending') + 'Change Sorting', fn: settings.setSorting },
 		{ type: 'item', title: build.iconic('dropbox', 'ionicons') + 'Set Dropbox', fn: settings.setDropboxKey },
 		{ type: 'separator' },

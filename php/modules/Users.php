@@ -20,6 +20,25 @@ class Users extends Module {
 
 	}
 
+  public function get($username){
+      
+      # Check dependenices
+      self::dependencies(isset($this->database));
+
+      if($username !== ''){
+        $query = Database::prepare($this->database, "SELECT name, role FROM ? WHERE name = '?'", array(LYCHEE_TABLE_USERS, $username));
+      }
+      else{
+        $query = Database::prepare($this->database, "SELECT name, role FROM ?", array(LYCHEE_TABLE_USERS));
+      }
+      $result = $this->database->query($query);
+
+      $data = [];
+      while($row = $result->fetch_assoc()){
+        $data[] = $row;
+      }
+      return json_encode($data);
+  }
   public function addUser($username, $password, $role){
       
       # Check dependencies
@@ -39,7 +58,7 @@ class Users extends Module {
       # Insert in database
       # Do not prepare pwhash, since the escaping would
       # destroy it
-      $query = Database::prepare($this->database, "INSERT INTO ? (name, pwhash, role) VALUES ('?', '". $pwhash ."', ?)", array(LYCHEE_TABLE_USERS, $username, $role));
+      $query = Database::prepare($this->database, "INSERT INTO ? (name, pwhash, role) VALUES ('?', '". $pwhash ."', '?')", array(LYCHEE_TABLE_USERS, $username, $role));
       $result = $this->database->query($query);
       if(!$result){
           Log::error($this->database, __METHOD__, __LINE__, "Failed to create user: " . $database->error);
@@ -92,17 +111,21 @@ class Users extends Module {
       return false; 
   }
 
-  public function changePassword($username, $oldPassword, $newpassword){
+  public function changePassword($username, $oldPassword, $newpassword, $newPwRepeat){
 
       # Check dependencies
       self::dependencies(isset($this->database));
+
+      if($newpassword !== $newPwRepeat){
+         return false;
+      }
 
       # Check credentials
       $query = Database::prepare($this->database, "SELECT * FROM ? WHERE name = '?'", array(LYCHEE_TABLE_USERS, $username));
       $result = $this->database->query($query);
       if($result->num_rows !== 1){
         Log::error($this->database, __METHOD__, __LINE__, "Multiple users with the same name exists...");
-        exit("Failed to verify old password");
+        return false;
       }
       $user = $result->fetch_object();
 
@@ -119,8 +142,9 @@ class Users extends Module {
             return false;
           }
 
+          return true;
       }
-      return true; 
+      return false; 
   }
 
   public function changePrivileges(){
@@ -128,77 +152,6 @@ class Users extends Module {
   
   }
 
-
-
-/*
-	public function setLogin($oldPassword = '', $username, $password) {
-
-		# Check dependencies
-		self::dependencies(isset($this->database));
-
-		# Load settings
-		$settings = $this->get();
-
-		if ($oldPassword===$settings['password']||$settings['password']===crypt($oldPassword, $settings['password'])) {
-
-			# Save username
-			if ($this->setUsername($username)!==true) exit('Error: Updating username failed!');
-
-			# Save password
-			if ($this->setPassword($password)!==true) exit('Error: Updating password failed!');
-
-			return true;
-
-		}
-
-		exit('Error: Current password entered incorrectly!');
-
-	}
-
-	private function setUsername($username) {
-
-		# Check dependencies
-		self::dependencies(isset($this->database));
-
-		# Hash username
-		$username = getHashedString($username);
-
-		# Execute query
-		# Do not prepare $username because it is hashed and save
-		# Preparing (escaping) the username would destroy the hash
-		$query	= Database::prepare($this->database, "UPDATE ? SET value = '$username' WHERE `key` = 'username'", array(LYCHEE_TABLE_SETTINGS));
-		$result	= $this->database->query($query);
-
-		if (!$result) {
-			Log::error($this->database, __METHOD__, __LINE__, $this->database->error);
-			return false;
-		}
-		return true;
-
-	}
-
-	private function setPassword($password) {
-
-		# Check dependencies
-		self::dependencies(isset($this->database));
-
-		# Hash password
-		$password = getHashedString($password);
-
-		# Execute query
-		# Do not prepare $password because it is hashed and save
-		# Preparing (escaping) the password would destroy the hash
-		$query	= Database::prepare($this->database, "UPDATE ? SET value = '$password' WHERE `key` = 'password'", array(LYCHEE_TABLE_SETTINGS));
-		$result	= $this->database->query($query);
-
-		if (!$result) {
-			Log::error($this->database, __METHOD__, __LINE__, $this->database->error);
-			return false;
-		}
-		return true;
-
-	}
- */
 }
 
 ?>

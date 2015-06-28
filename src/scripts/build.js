@@ -234,3 +234,97 @@ build.tags = function(tags) {
 	return html
 
 }
+
+build.usersModal = function(title, users) {
+
+	var html	= '',
+		i		= 0,
+		file	= null;
+
+	html =	`
+			<h1>${ title }</h1>
+			<div class='rows'>
+			`
+
+	while (i<users.length) {
+
+		user = users[i];
+
+		if (user.name.length>40) user.name = user.name.substr(0, 17) + '...' + user.name.substr(user.name.length-20, 20);
+
+
+    var roleCapitilized = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+		html +=	`
+				<div class='row selectable' onclick='users.manageUser("${ user.name }")'>
+					<a class='name'>${ lychee.escapeHTML(user.name) }</a>
+          <a class='role'>${ roleCapitilized }</a>
+          <a class='trash' onclick='users.deleteUser("${ user.name }");event.cancelBubble=true;'>Delete</a>
+        </div>
+    `
+
+		i++;
+
+	}
+
+	html +=	'</div>';
+
+	return html;
+
+}
+
+build.userModal = function(title, albums) {
+
+	var html	= '',
+		i		= 0,
+
+	html =	`
+			<h1>${ title }</h1>
+			<div class='rows'>
+			`
+
+	while (i<albums.length) {
+
+		var album = albums[i];
+
+		if (album.title.length>40) album.title = album.title.substr(0, 17) + '...' + album.title.substr(album.title.length-20, 20);
+
+		html +=	`
+				<div class='row'>
+    `
+    if(album.thumbs.length > 0){
+      html += `<img class='thumbnail' src='${ album.thumbs[0]}'></img>`;
+      html += `<span class='thumbnail'>&nbsp;</span>`;
+    }
+
+    html += `
+					<a class='name title'>${ lychee.escapeHTML(album.title) }</a>
+				  <form>
+					  <div class='choice rowchoice'>
+						  <label>
+							  <input type='checkbox' name='visible'>
+							  <span class='checkbox'>${ build.iconic('check') }</span>
+							  <span class='label'>Read</span>
+						  </label>
+            </div>
+					  <div class='choice rowchoice'>
+						  <label>
+							  <input type='checkbox' name='visible'>
+							  <span class='checkbox'>${ build.iconic('check') }</span>
+							  <span class='label'>Write</span>
+						  </label>
+            </div>
+          </form>
+
+          </div>
+    `
+
+		i++;
+
+	}
+
+	html +=	'</div>';
+
+	return html;
+
+}
+

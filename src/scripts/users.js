@@ -1,6 +1,6 @@
 /**
  * @description Does stuff to the users
- * @copyright	2015 by Viktor Hansson
+ * @copyright 2015 by Viktor Hansson
  */
 
 users = {}
@@ -36,25 +36,31 @@ users.addUser = function() {
 		api.post('Users::addUser', params, function(data) {
 
 			if (data!==true) {
-        console.log(data);
 
 				basicModal.show({
-					body: '<p>Unable to save login. Please try again with another username and password!</p>',
+					body: '<p>Unable to create new user,</p>',
 					buttons: {
 						action: {
 							title: 'Retry',
-							fn: settings.createLogin
+							fn: users.addUser
+						},
+						cancel: {
+						 title: 'Cancel',
+						 fn: basicModal.close
 						}
 					}
 				});
 
+			}
+			else{
+				users.manageUsers();
 			}
 
 		});
 
 	}
 
-	msg =	`
+	msg = `
 			<p>
 				Enter a username and password for the new user:
 				<input data-name='username' class='text' type='text' placeholder='New Username' value=''>
@@ -66,7 +72,7 @@ users.addUser = function() {
 		body: msg,
 		buttons: {
 			action: {
-				title: 'Create Login',
+				title: 'Create User',
 				fn: action
 			},
 			cancel: {
@@ -78,68 +84,37 @@ users.addUser = function() {
 
 }
 
-users.deleteUser = function() {
+users.deleteUser = function(username){
 
-	var action,
-		msg = '';
-
-	action = function(data) {
-
-		var params,
-			username = data.username;
-
-		if (username.length<1) {
-			basicModal.error('username');
-			return false;
-		}
-
-		basicModal.close();
-
-		params = {
-			username,
-		}
-
-		api.post('Users::deleteUser', params, function(data) {
-
-			if (data!==true) {
-        console.log(data);
-
-				basicModal.show({
-					body: '<p>Unable to save login. Please try again with another username and password!</p>',
-					buttons: {
-						action: {
-							title: 'Retry',
-							fn: settings.createLogin
-						}
-					}
-				});
-
-			}
-
-		});
-
+	if (username.length<1) {
+		return false;
 	}
 
-	msg =	`
-			<p>
-				Enter a username and password for the new user:
-				<input data-name='username' class='text' type='text' placeholder='User to delete' value=''>
-			</p>
-			`
+	params = {
+		username,
+	}
 
-	basicModal.show({
-		body: msg,
-		buttons: {
-			action: {
-				title: 'Delete User',
-				fn: action
-			},
-			cancel: {
-				title: 'Cancel',
-				fn: basicModal.close
-			}
+	api.post('Users::deleteUser', params, function(data) {
+
+		console.log(data);
+		if (data!==true) {
+
+			basicModal.show({
+				body: '<p>Unable to delete user!</p>',
+				buttons: {
+					action: {
+						title: 'Close',
+						fn: users.manageUsers
+					}
+				}
+			});
 		}
+		else{
+			users.manageUsers();
+		}
+
 	});
+
 
 }
 
@@ -150,11 +125,11 @@ users.changePassword = function() {
 
 	action = function(data) {
 
-    console.log(data);
+		console.log(data);
 		var params,
 			oldPassword = data.oldPassword,
-      newPassword = data.newPassword,
-      newPwRepeat = data.newPwRepeat;
+			newPassword = data.newPassword,
+			newPwRepeat = data.newPwRepeat;
 
 		if (oldPassword.length<1) {
 			basicModal.error('oldPassword');
@@ -174,15 +149,14 @@ users.changePassword = function() {
 		basicModal.close();
 
 		params = {
-       oldPassword,
-       newPassword,
-       newPwRepeat
+			 oldPassword,
+			 newPassword,
+			 newPwRepeat
 		}
 
 		api.post('Users::changePassword', params, function(data) {
 
 			if (data!==true) {
-        console.log(data);
 
 				basicModal.show({
 					body: '<p>Unable to save new password. Please try again</p>',
@@ -190,6 +164,10 @@ users.changePassword = function() {
 						action: {
 							title: 'Retry',
 							fn: users.changePassword
+						},
+						action: {
+							title: 'Close',
+							fn: basicModal.close
 						}
 					}
 				});
@@ -200,7 +178,7 @@ users.changePassword = function() {
 
 	}
 
-	msg =	`
+	msg = `
 			<p>
 				Enter your old password and the new password:
 				<input data-name='oldPassword' class='text' type='password' placeholder='Old Password' value=''>
@@ -221,6 +199,61 @@ users.changePassword = function() {
 				fn: basicModal.close
 			}
 		}
+	});
+
+}
+
+
+users.manageUsers = function(){
+
+	api.post('Users::get', '',  function(data) {
+
+		if (data!==true) {
+
+			var userlist = JSON.parse(data);
+
+			basicModal.show({
+				body: build.usersModal('Users', userlist),
+				buttons: {
+					action : {
+						title: 'Add User',
+						fn: users.addUser
+					},
+					cancel: {
+						title: 'Close',
+						fn: basicModal.close
+					}
+				}
+			});
+
+		}
+
+	});
+
+}
+
+users.manageUser = function(username){
+
+	var params = {'username' : username};
+
+	api.post('Album::getAll', params, function(data) {
+
+		if (data!==true) {
+
+			console.log(data.albums);
+
+			basicModal.show({
+				body: build.userModal(username, data.albums),
+				buttons: {
+					action : {
+						title: 'Back',
+						fn: users.manageUsers
+					}
+				}
+			});
+
+		}
+
 	});
 
 }
