@@ -329,9 +329,9 @@ class Admin extends Access {
 
   private function addUser(){
 
-      Module::dependencies(isset($_POST['username'], $_POST['password']));
+      Module::dependencies(isset($_POST['username'], $_POST['password'], $_POST['role']));
       $users = new Users($this->database);
-      echo $users->addUser($_POST['username'], $_POST['password'], 'admin');
+      echo $users->addUser($_POST['username'], $_POST['password'], $_POST['role']);
   
   }
 

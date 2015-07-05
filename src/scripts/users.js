@@ -11,11 +11,15 @@ users.addUser = function() {
 		msg = '';
 
 	action = function(data) {
+    console.log(data);
 
 		var params,
 			username = data.username,
 			password = data.password;
 
+
+		var role = $('.basicModal select#role').val();
+	
 		if (username.length<1) {
 			basicModal.error('username');
 			return false;
@@ -30,7 +34,8 @@ users.addUser = function() {
 
 		params = {
 			username,
-			password
+			password,
+      role
 		}
 
 		api.post('Users::addUser', params, function(data) {
@@ -65,6 +70,15 @@ users.addUser = function() {
 				Enter a username and password for the new user:
 				<input data-name='username' class='text' type='text' placeholder='New Username' value=''>
 				<input data-name='password' class='text' type='password' placeholder='New Password' value=''>
+			</p>
+			<p>
+				Role:
+				<span class="select">
+					<select id='role'>
+						<option value='admin'>Admin</option>
+						<option value='user'>User</option>
+					</select>
+				</span>
 			</p>
 			`
 
