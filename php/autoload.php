@@ -19,7 +19,7 @@ function lycheeAutoloaderModules($class_name) {
 
 function lycheeAutoloaderAccess($class_name) {
 
-	$access = array('Access', 'Admin', 'Guest', 'Installation');
+	$access = array('Access', 'Admin', 'User', 'Guest', 'Installation');
 	if (!in_array($class_name, $access)) return false;
 
 	$file = LYCHEE . 'php/access/' . $class_name . '.php';

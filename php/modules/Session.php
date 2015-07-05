@@ -91,6 +91,7 @@ class Session extends Module {
 			unset($return['config']['imagick']);
 			unset($return['config']['medium']);
 			unset($return['config']['plugins']);
+			unset($return['role']);
 
 		}
 
@@ -113,10 +114,11 @@ class Session extends Module {
     # Check the login
     $users = new Users($this->database);
 
-		if ($users->checkLogin($username,$password)) {
+		if ($result = $users->checkLogin($username,$password)) {
 				$_SESSION['login']		= true;
 				$_SESSION['identifier']	= $this->settings['identifier'];
 				$_SESSION['username']	= $username;
+				$_SESSION['role']	= $result['role'];
 
 				$expire = time() + 60 * $this->settings['sessionLength'];
 				$hash = hash("sha1", $expire.$this->settings['identifier'].$username.$password);
@@ -125,7 +127,7 @@ class Session extends Module {
 
 				setcookie("SESSION", $hash, $expire, "/","", false, true);
 
-				return true;
+				return array('role' => $_SESSION['role']);
 		}
 
   	# No login

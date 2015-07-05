@@ -7,15 +7,25 @@ contextMenu = {}
 
 contextMenu.add = function(e) {
 
-	let items = [
-		{ type: 'item', title: build.iconic('image') + 'Upload Photo', fn: () => $('#upload_files').click() },
-		{ type: 'separator' },
-		{ type: 'item', title: build.iconic('link-intact') + 'Import from Link', fn: upload.start.url },
-		{ type: 'item', title: build.iconic('dropbox', 'ionicons') + 'Import from Dropbox', fn: upload.start.dropbox },
-		{ type: 'item', title: build.iconic('terminal') + 'Import from Server', fn: upload.start.server },
-		{ type: 'separator' },
-		{ type: 'item', title: build.iconic('folder') + 'New Album', fn: album.add }
-	]
+	let items
+	if( lychee.role === 'admin'){
+		 items = [
+			{ type: 'item', title: build.iconic('image') + 'Upload Photo', fn: () => $('#upload_files').click() },
+			{ type: 'separator' },
+			{ type: 'item', title: build.iconic('link-intact') + 'Import from Link', fn: upload.start.url },
+			{ type: 'item', title: build.iconic('dropbox', 'ionicons') + 'Import from Dropbox', fn: upload.start.dropbox },
+			{ type: 'item', title: build.iconic('terminal') + 'Import from Server', fn: upload.start.server },
+			{ type: 'separator' },
+			{ type: 'item', title: build.iconic('folder') + 'New Album', fn: album.add }
+		]
+	}
+	else if( lychee.role === 'user'){
+		 items = [
+			{ type: 'item', title: build.iconic('image') + 'Upload Photo', fn: () => $('#upload_files').click() },
+			{ type: 'separator' },
+			{ type: 'item', title: build.iconic('link-intact') + 'Import from Link', fn: upload.start.url },
+		]
+	}
 
 	basicContext.show(items, e.originalEvent)
 
@@ -25,18 +35,31 @@ contextMenu.add = function(e) {
 
 contextMenu.settings = function(e) {
 
-	let items = [
-		{ type: 'item', title: build.iconic('person') + 'Change Password', fn: users.changePassword },
-		{ type: 'item', title: build.iconic('person') + 'Manage Users', fn: users.manageUsers },
-		{ type: 'item', title: build.iconic('sort-ascending') + 'Change Sorting', fn: settings.setSorting },
-		{ type: 'item', title: build.iconic('dropbox', 'ionicons') + 'Set Dropbox', fn: settings.setDropboxKey },
-		{ type: 'separator' },
-		{ type: 'item', title: build.iconic('info') + 'About Lychee', fn: () => window.open(lychee.website) },
-		{ type: 'item', title: build.iconic('wrench') + 'Diagnostics', fn: () => window.open('plugins/check/') },
-		{ type: 'item', title: build.iconic('align-left') + 'Show Log', fn: () => window.open('plugins/displaylog/') },
-		{ type: 'separator' },
-		{ type: 'item', title: build.iconic('account-logout') + 'Sign Out', fn: lychee.logout }
-	]
+	let items
+	if( lychee.role === 'admin'){
+		 items = [
+			{ type: 'item', title: build.iconic('person') + 'Change Password', fn: users.changePassword },
+			{ type: 'item', title: build.iconic('person') + 'Manage Users', fn: users.manageUsers },
+			{ type: 'item', title: build.iconic('sort-ascending') + 'Change Sorting', fn: settings.setSorting },
+			{ type: 'item', title: build.iconic('dropbox', 'ionicons') + 'Set Dropbox', fn: settings.setDropboxKey },
+			{ type: 'separator' },
+			{ type: 'item', title: build.iconic('info') + 'About Lychee', fn: () => window.open(lychee.website) },
+			{ type: 'item', title: build.iconic('wrench') + 'Diagnostics', fn: () => window.open('plugins/check/') },
+			{ type: 'item', title: build.iconic('align-left') + 'Show Log', fn: () => window.open('plugins/displaylog/') },
+			{ type: 'separator' },
+			{ type: 'item', title: build.iconic('account-logout') + 'Sign Out', fn: lychee.logout }
+		]
+	}
+	else if( lychee.role === 'user'){
+		items = [
+			{ type: 'item', title: build.iconic('person') + 'Change Password', fn: users.changePassword },
+			{ type: 'item', title: build.iconic('sort-ascending') + 'Change Sorting', fn: settings.setSorting },
+			{ type: 'separator' },
+			{ type: 'item', title: build.iconic('info') + 'About Lychee', fn: () => window.open(lychee.website) },
+			{ type: 'separator' },
+			{ type: 'item', title: build.iconic('account-logout') + 'Sign Out', fn: lychee.logout }
+		]
+	}
 
 	basicContext.show(items, e.originalEvent)
 
@@ -47,8 +70,11 @@ contextMenu.album = function(albumID, e) {
 	// Notice for 'Merge':
 	// fn must call basicContext.close() first,
 	// in order to keep the selection
+	
+	// Only admin can do stuff to the albums
+	if(lychee.role !== 'admin') return false
 
-	if (albumID==='0' || albumID==='f' || albumID==='s' || albumID==='r') return false
+	if (albumID==='0'||albumID==='f'||albumID==='s'||albumID==='r') return false
 
 	// Show merge-item when there's more than one album
 	let showMerge = (albums.json && albums.json.albums && Object.keys(albums.json.albums).length>1)
@@ -67,7 +93,10 @@ contextMenu.album = function(albumID, e) {
 
 contextMenu.albumMulti = function(albumIDs, e) {
 
-	multiselect.stopResize()
+	// Only admin can do stuff to the albums
+	if(lychee.role !== 'admin') return false
+
+	multiselect.stopResize();
 
 	// Automatically merge selected albums when albumIDs contains more than one album
 	// Show list of albums otherwise
@@ -108,11 +137,15 @@ contextMenu.albumTitle = function(albumID, e) {
 
 			})
 
-			items.unshift({ type: 'separator' })
+			if( lychee.role === 'admin'){
+				items.unshift({ type: 'separator' })
+			}
 
 		}
 
-		items.unshift({ type: 'item', title: build.iconic('pencil') + 'Rename', fn: () => album.setTitle([albumID]) })
+		if( lychee.role === 'admin'){
+			items.unshift({ type: 'item', title: build.iconic('pencil') + 'Rename', fn: () => album.setTitle([albumID]) })
+		}
 
 		basicContext.show(items, e.originalEvent, contextMenu.close)
 

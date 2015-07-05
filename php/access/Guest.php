@@ -122,7 +122,7 @@ class Guest extends Access {
 
 		Module::dependencies(isset($_POST['user'], $_POST['password']));
 		$session = new Session($this->database, $dbName, $this->plugins, $this->settings);
-		echo $session->login($_POST['user'], $_POST['password']);
+		echo json_encode($session->login($_POST['user'], $_POST['password']));
 
 	}
 

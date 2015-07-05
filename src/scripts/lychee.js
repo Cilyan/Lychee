@@ -26,7 +26,9 @@ lychee = {
 	dropboxKey      : '',
 
 	content         : $('#content'),
-	imageview       : $('#imageview')
+	imageview       : $('#imageview'),
+
+	role: 'guest'
 
 }
 
@@ -52,6 +54,12 @@ lychee.init = function() {
 			lychee.dropboxKey      = data.config.dropboxKey      || ''
 			lychee.location        = data.config.location        || ''
 			lychee.checkForUpdates = data.config.checkForUpdates || '1'
+			lychee.role = (localStorage.getItem('lychee_role')!==null) ? localStorage.getItem('lychee_role') : 'guest'
+
+			// Disable buttons if not admin
+			if(lychee.role !== 'admin'){
+				$('#tools_album #button_trash_album').remove()
+			}
 
 			// Show dialog when there is no username and password
 			if (data.config.login===false) settings.createLogin()
@@ -98,18 +106,22 @@ lychee.login = function(data) {
 
 	api.post('Session::login', params, function(data) {
 
-		if (data===true) {
+		console.log(data)
+		if (data!==false) {
 
 			// Use 'try' to catch a thrown error when Safari is in private mode
-			try { localStorage.setItem('lychee_username', user) }
+			try { 
+				localStorage.setItem('lychee_username', user)
+				localStorage.setItem('lychee_role', data.role)
+			}
 			catch (err) {}
 
 			window.location.reload()
 
 		} else {
 
-			// Show error and reactive button
-			basicModal.error('password')
+				// Show error and reactive button
+				basicModal.error('password')
 
 		}
 
@@ -155,6 +167,7 @@ lychee.loginDialog = function() {
 
 lychee.logout = function() {
 
+	localStorage.removeItem('lychee_role')
 	api.post('Session::logout', {}, function() {
 		window.location.reload()
 	})

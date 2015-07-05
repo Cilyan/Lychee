@@ -64,7 +64,7 @@ if (!empty($_POST['function'])||!empty($_GET['function'])) {
 	else							$fn = $_GET['function'];
 
 	if ((isset($_SESSION['login'])&&$_SESSION['login']===true)&&
-		(isset($_SESSION['identifier'])&&$_SESSION['identifier']===$settings['identifier'])) {
+		(isset($_SESSION['identifier'])&&$_SESSION['identifier']===$settings['identifier']) && $_SESSION['role'] ==='admin') {
 
 		###
 		# Admin Access
@@ -76,7 +76,21 @@ if (!empty($_POST['function'])||!empty($_GET['function'])) {
 		$admin = new Admin($database, $plugins, $settings);
 		$admin->check($fn);
 
-	} else {
+  }else if ((isset($_SESSION['login'])&&$_SESSION['login']===true)&&
+		(isset($_SESSION['identifier'])&&$_SESSION['identifier']===$settings['identifier']) && $_SESSION['role'] ==='user') {
+
+		###
+		# User Access
+		# Restricted access to Lychee. Only with correct password/session.
+		###
+
+		define('LYCHEE_ACCESS_USER', true);
+
+		$user = new User($database, $plugins, $settings);
+		$user->check($fn);
+
+
+  }else {
 
 		###
 		# Guest Access

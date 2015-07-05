@@ -228,7 +228,7 @@ sidebar.createStructure.album = function(data) {
 	    password     = ''
 
 	// Enable editable when user logged in
-	if (lychee.publicMode===false) editable = true
+	if (lychee.publicMode===false && lychee.role === 'admin') editable = true
 
 	// Set value for public
 	switch (data.public) {
