@@ -106,7 +106,7 @@ class Users extends Module {
 
       # Check the password
       if (password_verify($password, $user->pwhash)){
-        return array('role' => $user->role);
+        return array('role' => $user->role, 'userid' => $user->id);
       }
       return false; 
   }

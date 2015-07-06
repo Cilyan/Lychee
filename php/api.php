@@ -64,7 +64,7 @@ if (!empty($_POST['function'])||!empty($_GET['function'])) {
 	else							$fn = $_GET['function'];
 
 	if ((isset($_SESSION['login'])&&$_SESSION['login']===true)&&
-		(isset($_SESSION['identifier'])&&$_SESSION['identifier']===$settings['identifier']) && $_SESSION['role'] ==='admin') {
+		(isset($_SESSION['identifier'])&&$_SESSION['identifier']===$settings['identifier']) && isset($_SESSION['role']) && $_SESSION['role'] ==='admin') {
 
 		###
 		# Admin Access
@@ -77,7 +77,7 @@ if (!empty($_POST['function'])||!empty($_GET['function'])) {
 		$admin->check($fn);
 
   }else if ((isset($_SESSION['login'])&&$_SESSION['login']===true)&&
-		(isset($_SESSION['identifier'])&&$_SESSION['identifier']===$settings['identifier']) && $_SESSION['role'] ==='user') {
+		(isset($_SESSION['identifier'])&&$_SESSION['identifier']===$settings['identifier']) && isset($_SESSION['role']) &&$_SESSION['role'] ==='user') {
 
 		###
 		# User Access

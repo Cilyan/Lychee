@@ -118,6 +118,7 @@ class Session extends Module {
 				$_SESSION['login']		= true;
 				$_SESSION['identifier']	= $this->settings['identifier'];
 				$_SESSION['username']	= $username;
+				$_SESSION['userid']	= $result['userid'];
 				$_SESSION['role']	= $result['role'];
 
 				$expire = time() + 60 * $this->settings['sessionLength'];

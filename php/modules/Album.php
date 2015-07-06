@@ -109,7 +109,9 @@ class Album extends Module {
 						$query = Database::prepare($this->database, "SELECT id, title, tags, public, star, album, thumbUrl, takestamp, url FROM ? WHERE album = 0 " . $this->settings['sortingPhotos'], array(LYCHEE_TABLE_PHOTOS));
 						break;
 
-			default:	$query	= Database::prepare($this->database, "SELECT * FROM ? WHERE id = '?' LIMIT 1", array(LYCHEE_TABLE_ALBUMS, $this->albumIDs));
+      default:	
+            #$query	= Database::prepare($this->database, "SELECT * FROM ? WHERE id = '?' LIMIT 1", array(LYCHEE_TABLE_ALBUMS, $this->albumIDs));
+            $query	= Database::prepare($this->database, "SELECT a.*, p.read, p.write FROM ? a JOIN ? p on ( a.id = p.album_id) WHERE id = '?' and p.user_id = '?' LIMIT 1", array(LYCHEE_TABLE_ALBUMS, LYCHEE_TABLE_PRIVILEGES, $this->albumIDs, $_SESSION['userid']));
 						$albums = $this->database->query($query);
 						$return = $albums->fetch_assoc();
 						$return['sysdate']	= date('d M. Y', $return['sysstamp']);
@@ -189,8 +191,13 @@ class Album extends Module {
 		if ($public===false) $return['smartalbums'] = $this->getSmartInfo();
 
 		# Albums query
-		if ($public===false)	$query = Database::prepare($this->database, 'SELECT id, title, public, sysstamp, password FROM ? ' . $this->settings['sortingAlbums'], array(LYCHEE_TABLE_ALBUMS));
-		else					$query = Database::prepare($this->database, 'SELECT id, title, public, sysstamp, password FROM ? WHERE public = 1 AND visible <> 0 ' . $this->settings['sortingAlbums'], array(LYCHEE_TABLE_ALBUMS));
+    if ($public===true){
+        $query = Database::prepare($this->database, 'SELECT id, title, public, sysstamp, password FROM ? WHERE public = 1 AND visible <> 0 ' . $this->settings['sortingAlbums'], array(LYCHEE_TABLE_ALBUMS));
+    }else if( $_SESSION['role'] === 'admin'){
+        $query = Database::prepare($this->database, 'SELECT id, title, public, sysstamp, password FROM ? ' . $this->settings['sortingAlbums'], array(LYCHEE_TABLE_ALBUMS));
+    }else if( $_SESSION['role'] === 'user'){
+        $query = Database::prepare($this->database, "SELECT a.*, p.read, p.write FROM ? a JOIN ? p on ( a.id = p.album_id) WHERE p.user_id = '?' LIMIT 1", array(LYCHEE_TABLE_ALBUMS, LYCHEE_TABLE_PRIVILEGES, $_SESSION['userid']));
+    }
 
 		# Execute query
 		$albums = $this->database->query($query);
