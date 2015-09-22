@@ -107,7 +107,7 @@ lychee.login = function(data) {
 	api.post('Session::login', params, function(data) {
 
 		console.log(data)
-		if (data!==false) {
+		if (data!="false") {
 
 			// Use 'try' to catch a thrown error when Safari is in private mode
 			try { 
