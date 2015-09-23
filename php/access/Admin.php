@@ -58,10 +58,12 @@ class Admin extends Access {
 			case 'Photo::getArchive':		$this->getPhotoArchive(); break;
 
       # User functions
-      case 'Users::get':           $this->getUsers(); break;
-      case 'Users::addUser':       $this->addUser(); break;
-      case 'Users::deleteUser':    $this->deleteUser(); break;
-      case 'Users::changePassword':$this->changePassword(); break;
+      case 'Users::get':              $this->getUsers(); break;
+      case 'Users::addUser':          $this->addUser(); break;
+      case 'Users::deleteUser':       $this->deleteUser(); break;
+      case 'Users::changePassword':   $this->changePassword(); break;
+      case 'Users::getPrivileges':    $this->getPrivileges(); break;
+      case 'Users::changePrivileges': $this->changePrivileges(); break;
 
 			# Error
 			default:						exit('Error: Function not found! Please check the spelling of the called function.');
@@ -358,5 +360,23 @@ class Admin extends Access {
       echo $users->get($username);
 
   }
+
+  private function getPrivileges(){
+
+      Module::dependencies(isset($_POST['userid']));
+      $users = new Users($this->database);
+      echo json_encode($users->getPrivileges($_POST['userid']));
+
+  }
+
+
+  private function changePrivileges(){
+
+      Module::dependencies(isset($_POST['userid'], $_POST['albumid'], $_POST['privilege'] , $_POST['state']));
+      $users = new Users($this->database);
+      echo $users->changePrivileges($_POST['userid'], $_POST['albumid'], $_POST['privilege'] , $_POST['state']);
+
+  }
+
 
 }

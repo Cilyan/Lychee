@@ -26,10 +26,10 @@ class Users extends Module {
       self::dependencies(isset($this->database));
 
       if($username !== ''){
-        $query = Database::prepare($this->database, "SELECT name, role FROM ? WHERE name = '?'", array(LYCHEE_TABLE_USERS, $username));
+        $query = Database::prepare($this->database, "SELECT name, role, id FROM ? WHERE name = '?'", array(LYCHEE_TABLE_USERS, $username));
       }
       else{
-        $query = Database::prepare($this->database, "SELECT name, role FROM ?", array(LYCHEE_TABLE_USERS));
+        $query = Database::prepare($this->database, "SELECT name, role, id FROM ? ORDER BY role ", array(LYCHEE_TABLE_USERS));
       }
       $result = $this->database->query($query);
 
@@ -147,8 +147,49 @@ class Users extends Module {
       return false; 
   }
 
-  public function changePrivileges(){
-      # TODO
+  public function getPrivileges($userid){
+
+      # Check deps
+      self::dependencies(isset($this->database));
+
+      $query = Database::prepare($this->database, "SELECT a.id, a.title, p.read, p.write FROM ? a LEFT JOIN ? p ON a.id = p.album_id AND p.user_id = ?", array(LYCHEE_TABLE_ALBUMS, LYCHEE_TABLE_PRIVILEGES, $userid));
+
+      Log::error($this->database, __METHOD__, __LINE__, "test" . $query);
+
+      $result = $this->database->query($query);
+      if(!$result){
+          Log::error($this->database, __METHOD__, __LINE__, "Failed to get privileges");
+          return false;
+      }
+
+      $data = [];
+      while($row = $result->fetch_assoc()){
+        $data[] = $row;
+      }
+
+      return $data;
+  
+  }
+
+  public function changePrivileges($userid, $albumid, $privilege , $state){
+
+      # Check deps
+      self::dependencies(isset($this->database));
+
+      # This cleans read an write input
+      $field = $privilege == '0' ? 'read' : 'write';
+      $state = $state ? 1 : 0;
+
+      $query = Database::prepare($this->database, "INSERT INTO ? (`user_id`, `album_id`, `?`) VALUES ('?', '?','?') ON DUPLICATE KEY UPDATE `?`='?';", array(LYCHEE_TABLE_PRIVILEGES, $field, $userid, $albumid, $state, $field, $state));
+
+      Log::error($this->database, __METHOD__, __LINE__, "test" . $query);
+
+      $result = $this->database->query($query);
+      if(!$result){
+          Log::error($this->database, __METHOD__, __LINE__, "Failed to insert privilege");
+          return false;
+      }
+      return true;
   
   }
 

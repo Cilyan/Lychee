@@ -246,18 +246,18 @@ users.manageUsers = function(){
 
 }
 
-users.manageUser = function(username){
+users.manageUser = function(username, userid){
 
-	var params = {'username' : username};
+	var params = {'userid' : userid};
 
-	api.post('Album::getAll', params, function(data) {
+	api.post('Users::getPrivileges', params, function(data) {
 
 		if (data!==true) {
 
 			console.log(data.albums);
 
 			basicModal.show({
-				body: build.userModal(username, data.albums),
+				body: build.userModal(username, userid, JSON.parse(data)),
 				buttons: {
 					action : {
 						title: 'Back',
@@ -269,6 +269,26 @@ users.manageUser = function(username){
 		}
 
 	});
+
+}
+
+users.changePrivileges = function(userid, albumid, privilege, state){
+
+    var state = state ? '1' : '0';
+    var params = {'userid': userid, 'albumid': albumid, 'privilege' : privilege, 'state': state};
+
+    api.post('Users::changePrivileges', params, function(data) {
+
+        if (data!="true") {
+            console.log("Failed to set privileges");
+
+        }
+        else{
+          console.log("SEt privileges");
+        }
+
+    });
+
 
 }
 

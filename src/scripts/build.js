@@ -254,8 +254,18 @@ build.usersModal = function(title, users) {
 
 
     var roleCapitilized = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+    var admin = user.role == "admin";
+    if (admin){
+        html +=	`
+            <div class='row'>
+            `
+    }else{
+        html +=	`
+            <div class='row selectable' onclick='users.manageUser("${ user.name }", "${ user.id }")'>
+            `
+    }
+
 		html +=	`
-				<div class='row selectable' onclick='users.manageUser("${ user.name }")'>
 					<a class='name'>${ lychee.escapeHTML(user.name) }</a>
           <a class='role'>${ roleCapitilized }</a>
           <a class='trash' onclick='users.deleteUser("${ user.name }");event.cancelBubble=true;'>Delete</a>
@@ -272,7 +282,7 @@ build.usersModal = function(title, users) {
 
 }
 
-build.userModal = function(title, albums) {
+build.userModal = function(title, userid,  albums) {
 
 	var html	= '',
 		i		= 0,
@@ -285,30 +295,35 @@ build.userModal = function(title, albums) {
 	while (i<albums.length) {
 
 		var album = albums[i];
+    var albumid = album.id;
 
 		if (album.title.length>40) album.title = album.title.substr(0, 17) + '...' + album.title.substr(album.title.length-20, 20);
 
 		html +=	`
 				<div class='row'>
     `
+    /*
     if(album.thumbs.length > 0){
       html += `<img class='thumbnail' src='${ album.thumbs[0]}'></img>`;
       html += `<span class='thumbnail'>&nbsp;</span>`;
     }
+*/
+    var read = album.read == '1' ? 'checked' : '';
+    var write = album.write == '1' ? 'checked' : '';
 
     html += `
 					<a class='name title'>${ lychee.escapeHTML(album.title) }</a>
 				  <form>
 					  <div class='choice rowchoice'>
 						  <label>
-							  <input type='checkbox' name='visible'>
+							  <input ${ read } type='checkbox' name='visible' onclick='users.changePrivileges(${ userid }, ${ albumid }, 0, this.checked)'>
 							  <span class='checkbox'>${ build.iconic('check') }</span>
 							  <span class='label'>Read</span>
 						  </label>
             </div>
 					  <div class='choice rowchoice'>
 						  <label>
-							  <input type='checkbox' name='visible'>
+							  <input ${ write } type='checkbox' name='visible' onclick='users.changePrivileges(${ userid }, ${ albumid }, 1, this.checked)'>
 							  <span class='checkbox'>${ build.iconic('check') }</span>
 							  <span class='label'>Write</span>
 						  </label>
