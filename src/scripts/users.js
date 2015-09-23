@@ -279,16 +279,14 @@ users.changePrivileges = function(userid, albumid, privilege, state){
 
     api.post('Users::changePrivileges', params, function(data) {
 
-        if (data!="true") {
+        if (data!==true) {
             console.log("Failed to set privileges");
-
         }
         else{
           console.log("SEt privileges");
         }
 
     });
-
 
 }
 

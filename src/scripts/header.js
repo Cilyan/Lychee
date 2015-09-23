@@ -143,6 +143,8 @@ header.setMode = function(mode) {
 			// Hide download button when not logged in and album not downloadable
 			if (lychee.publicMode===true && album.json.downloadable==='0') $('#button_archive').hide()
 
+			console.log(album.json)
+
 			if (albumID==='s' || albumID==='f' || albumID==='r') {
 				$('#button_info_album, #button_trash_album, #button_share_album').hide()
 			} else if (albumID==='0') {
@@ -151,6 +153,26 @@ header.setMode = function(mode) {
 			} else {
 				$('#button_info_album, #button_trash_album, #button_share_album').show()
 			}
+
+			// Show if rights are permitting this button
+			if(album.json.upload === '1'){
+				$('#tools_album .button_add').show()
+			}else{
+				$('#tools_album .button_add').hide()
+			}
+			if(album.json.erase === '1'){
+				$('#tools_album #button_trash_album').show()
+			}else{
+				$('#tools_album #button_trash_album').hide()
+			}
+
+			// Show all buttons if admin
+			try{
+				let role = localStorage.getItem('lychee_role')
+				if(role === 'admin'){
+					$('#tools_album .button_add, #button_trash_album').show()
+				}
+			}catch(err){}
 
 			return true
 			break

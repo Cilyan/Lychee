@@ -115,7 +115,7 @@ class Album extends Module {
             if($_SESSION['role'] === 'admin'){
               $query	= Database::prepare($this->database, "SELECT * FROM ? WHERE id = '?' LIMIT 1", array(LYCHEE_TABLE_ALBUMS, $this->albumIDs));
             }else{
-              $query	= Database::prepare($this->database, "SELECT a.*, p.read, p.write FROM ? a JOIN ? p on ( a.id = p.album_id) WHERE id = '?' and p.user_id = '?' and p.read = '1' LIMIT 1", array(LYCHEE_TABLE_ALBUMS, LYCHEE_TABLE_PRIVILEGES, $this->albumIDs, $_SESSION['userid']));
+              $query	= Database::prepare($this->database, "SELECT a.*, p.view, p.upload, p.erase FROM ? a JOIN ? p on ( a.id = p.album_id) WHERE id = '?' and p.user_id = '?' and p.view = '1' LIMIT 1", array(LYCHEE_TABLE_ALBUMS, LYCHEE_TABLE_PRIVILEGES, $this->albumIDs, $_SESSION['userid']));
             }
 						$albums = $this->database->query($query);
 						$return = $albums->fetch_assoc();
@@ -208,7 +208,7 @@ class Album extends Module {
     }else if( $_SESSION['role'] === 'admin'){
         $query = Database::prepare($this->database, 'SELECT id, title, public, sysstamp, password FROM ? ' . $this->settings['sortingAlbums'], array(LYCHEE_TABLE_ALBUMS));
     }else if( $_SESSION['role'] === 'user'){
-        $query = Database::prepare($this->database, "SELECT a.*, p.read, p.write FROM ? a JOIN ? p on ( a.id = p.album_id) WHERE p.user_id = '?' AND p.read = '1'", array(LYCHEE_TABLE_ALBUMS, LYCHEE_TABLE_PRIVILEGES, $_SESSION['userid']));
+        $query = Database::prepare($this->database, "SELECT a.*, p.view, p.upload, p.erase FROM ? a JOIN ? p on ( a.id = p.album_id) WHERE p.user_id = '?' AND p.view = '1'", array(LYCHEE_TABLE_ALBUMS, LYCHEE_TABLE_PRIVILEGES, $_SESSION['userid']));
     }
 
 		# Execute query

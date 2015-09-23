@@ -308,24 +308,32 @@ build.userModal = function(title, userid,  albums) {
       html += `<span class='thumbnail'>&nbsp;</span>`;
     }
 */
-    var read = album.read == '1' ? 'checked' : '';
-    var write = album.write == '1' ? 'checked' : '';
+    var view = album.view == '1' ? 'checked' : '';
+    var upload = album.upload == '1' ? 'checked' : '';
+    var erase = album.erase == '1' ? 'checked' : '';
 
     html += `
 					<a class='name title'>${ lychee.escapeHTML(album.title) }</a>
 				  <form>
 					  <div class='choice rowchoice'>
 						  <label>
-							  <input ${ read } type='checkbox' name='visible' onclick='users.changePrivileges(${ userid }, ${ albumid }, 0, this.checked)'>
+							  <input ${ view } type='checkbox' name='visible' onclick='users.changePrivileges(${ userid }, ${ albumid }, 0, this.checked)'>
 							  <span class='checkbox'>${ build.iconic('check') }</span>
-							  <span class='label'>Read</span>
+							  <span class='label'>View</span>
 						  </label>
             </div>
 					  <div class='choice rowchoice'>
 						  <label>
-							  <input ${ write } type='checkbox' name='visible' onclick='users.changePrivileges(${ userid }, ${ albumid }, 1, this.checked)'>
+							  <input ${ upload } type='checkbox' name='visible' onclick='users.changePrivileges(${ userid }, ${ albumid }, 1, this.checked)'>
 							  <span class='checkbox'>${ build.iconic('check') }</span>
-							  <span class='label'>Write</span>
+							  <span class='label'>Upload</span>
+						  </label>
+            </div>
+					  <div class='choice rowchoice'>
+						  <label>
+							  <input ${ erase } type='checkbox' name='visible' onclick='users.changePrivileges(${ userid }, ${ albumid }, 2, this.checked)'>
+							  <span class='checkbox'>${ build.iconic('check') }</span>
+							  <span class='label'>Delete</span>
 						  </label>
             </div>
           </form>

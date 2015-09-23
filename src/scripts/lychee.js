@@ -57,9 +57,11 @@ lychee.init = function() {
 			lychee.role = (localStorage.getItem('lychee_role')!==null) ? localStorage.getItem('lychee_role') : 'guest'
 
 			// Disable buttons if not admin
+      /*
 			if(lychee.role !== 'admin'){
 				$('#tools_album #button_trash_album').remove()
 			}
+      */
 
 			// Show dialog when there is no username and password
 			if (data.config.login===false) settings.createLogin()

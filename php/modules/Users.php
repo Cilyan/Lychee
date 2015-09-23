@@ -152,7 +152,7 @@ class Users extends Module {
       # Check deps
       self::dependencies(isset($this->database));
 
-      $query = Database::prepare($this->database, "SELECT a.id, a.title, p.read, p.write FROM ? a LEFT JOIN ? p ON a.id = p.album_id AND p.user_id = ?", array(LYCHEE_TABLE_ALBUMS, LYCHEE_TABLE_PRIVILEGES, $userid));
+      $query = Database::prepare($this->database, "SELECT a.id, a.title, p.view, p.upload, p.erase FROM ? a LEFT JOIN ? p ON a.id = p.album_id AND p.user_id = ?", array(LYCHEE_TABLE_ALBUMS, LYCHEE_TABLE_PRIVILEGES, $userid));
 
       Log::error($this->database, __METHOD__, __LINE__, "test" . $query);
 
@@ -177,7 +177,12 @@ class Users extends Module {
       self::dependencies(isset($this->database));
 
       # This cleans read an write input
-      $field = $privilege == '0' ? 'read' : 'write';
+      $field = 0;
+      switch($privilege){
+        case '0': $field = 'view'; break;
+        case '1': $field = 'upload'; break;
+        case '2': $field = 'erase'; break;
+      }
       $state = $state ? 1 : 0;
 
       $query = Database::prepare($this->database, "INSERT INTO ? (`user_id`, `album_id`, `?`) VALUES ('?', '?','?') ON DUPLICATE KEY UPDATE `?`='?';", array(LYCHEE_TABLE_PRIVILEGES, $field, $userid, $albumid, $state, $field, $state));
