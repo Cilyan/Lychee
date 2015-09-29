@@ -128,8 +128,17 @@ header.setMode = function(mode) {
 			$('#tools_album, #tools_photo').hide()
 			$('#tools_albums').show()
 
-			return true
-			break
+			// Remove add button if user
+			try {
+				let role = localStorage.getItem('lychee_role')
+				if(role === 'user') {
+					$('#tools_albums .button_add').hide()
+				}
+			}
+			catch(err) {}
+
+			return true;
+			break;
 
 		case 'album':
 

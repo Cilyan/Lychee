@@ -52,6 +52,16 @@ class Photo extends Module {
 				Log::error($this->database, __METHOD__, __LINE__, 'An upload-folder is missing or not readable and writable');
 				exit('Error: An upload-folder is missing or not readable and writable!');
 		}
+		# Check rights
+		if ($_SESSION['role'] == 'user'){
+			$query = Database::prepare($this->database, "SELECT * FROM ? WHERE album_id=? AND user_id=? AND upload=1", array(LYCHEE_TABLE_PRIVILEGES, $albumID, $_SESSION['userid']));
+			$result = $this->database->query($query);
+			if ($result->num_rows == 0){
+				Log::error($this->database, __METHOD__, __LINE__, "User: ". $_SESSION['userid']. " tried to upload a photo to album:". $albumID);
+				http_response_code(401);
+				exit("User: ". $_SESSION['userid']. " tried to upload a photo to album:". $albumID);
+			}
+		}
 
 		# Call plugins
 		$this->plugins(__METHOD__, 0, func_get_args());
@@ -665,9 +675,22 @@ class Photo extends Module {
 		$this->plugins(__METHOD__, 0, func_get_args());
 
 		# Get photo
-		$query	= Database::prepare($this->database, "SELECT * FROM ? WHERE id = '?' LIMIT 1", array(LYCHEE_TABLE_PHOTOS, $this->photoIDs));
+		# First check if the user has rights to view photo
+		$query = '';
+		if ($_SESSION['role'] == 'user' && $albumID != 'false'){
+			$query = Database::prepare($this->database, "SELECT * FROM ? pic JOIN ? p ON p.album_id=pic.album WHERE pic.album=? AND p.view=1 AND p.user_id=?", array(LYCHEE_TABLE_PHOTOS, LYCHEE_TABLE_PRIVILEGES, $albumID, $_SESSION['userid']));
+			error_log($query);
+		} else {
+			$query = Database::prepare($this->database, "SELECT * FROM ? WHERE id = '?' LIMIT 1", array(LYCHEE_TABLE_PHOTOS, $this->photoIDs));
+		}
+
 		$photos	= $this->database->query($query);
 		$photo	= $photos->fetch_assoc();
+
+		if (!$photo){
+			http_response_code(401);
+			return; 
+		}
 
 		# Parse photo
 		$photo['sysdate'] = date('d M. Y', substr($photo['id'], 0, -4));
@@ -1188,16 +1211,32 @@ class Photo extends Module {
 		$this->plugins(__METHOD__, 0, func_get_args());
 
 		# Get photos
-		$query	= Database::prepare($this->database, "SELECT id, url, thumbUrl, checksum FROM ? WHERE id IN (?)", array(LYCHEE_TABLE_PHOTOS, $this->photoIDs));
+		$query	= Database::prepare($this->database, "SELECT id, album, url, thumbUrl, checksum FROM ? WHERE id IN (?)", array(LYCHEE_TABLE_PHOTOS, $this->photoIDs));
 		$photos	= $this->database->query($query);
 		if (!$photos) {
 			Log::error($this->database, __METHOD__, __LINE__, $this->database->error);
 			return false;
 		}
 
+	# Check rights to delete these photos
+	if ($_SESSION['role'] == 'user'){
+		$photo = $photos->fetch_assoc();
+		$photos->data_seek(0);
+		error_log($photo['album']);
+		$query = Database::prepare($this->database, "SELECT * FROM ? WHERE album_id=? AND user_id=? AND erase=1", array(LYCHEE_TABLE_PRIVILEGES, $photo['album'], $_SESSION['userid']));
+		error_log( $query);
+		$result = $this->database->query($query);
+		if ($result->num_rows == 0){
+			Log::error($this->database, __METHOD__, __LINE__, "User: ". $_SESSION['userid']. " tried to delete from album: ". $photo['album'] );
+			//http_response_code(401);
+			return false;
+		}
+	}
+
 		# For each photo
 		while ($photo = $photos->fetch_object()) {
 
+	  error_log("Delete image");
 			# Check if other photos are referring to this images
 			# If so, only delete the db entry
 			if ($this->exists($photo->checksum, $photo->id)===false) {

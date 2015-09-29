@@ -155,6 +155,9 @@ contextMenu.albumTitle = function(albumID, e) {
 
 contextMenu.mergeAlbum = function(albumID, e) {
 
+	// Only admin can do stuff to the albums
+	if(lychee.role !== 'admin') return false;
+
 	api.post('Album::getAll', {}, function(data) {
 
 		let items = []
@@ -186,16 +189,32 @@ contextMenu.photo = function(photoID, e) {
 	// Notice for 'Move':
 	// fn must call basicContext.close() first,
 	// in order to keep the selection
+	let items;
 
-	let items = [
-		{ type: 'item', title: build.iconic('star') + 'Star', fn: () => photo.setStar([photoID]) },
-		{ type: 'item', title: build.iconic('tag') + 'Tags', fn: () => photo.editTags([photoID]) },
-		{ type: 'separator' },
-		{ type: 'item', title: build.iconic('pencil') + 'Rename', fn: () => photo.setTitle([photoID]) },
-		{ type: 'item', title: build.iconic('layers') + 'Duplicate', fn: () => photo.duplicate([photoID]) },
-		{ type: 'item', title: build.iconic('folder') + 'Move', fn: () => { basicContext.close(); contextMenu.move([photoID], e) } },
-		{ type: 'item', title: build.iconic('trash') + 'Delete', fn: () => photo.delete([photoID]) }
-	]
+	if (lychee.role == 'admin') {
+		items = [
+			{ type: 'item', title: build.iconic('star') + 'Star', fn: () => photo.setStar([photoID]) },
+			{ type: 'item', title: build.iconic('tag') + 'Tags', fn: () => photo.editTags([photoID]) },
+			{ type: 'separator' },
+			{ type: 'item', title: build.iconic('pencil') + 'Rename', fn: () => photo.setTitle([photoID]) },
+			{ type: 'item', title: build.iconic('layers') + 'Duplicate', fn: () => photo.duplicate([photoID]) },
+			{ type: 'item', title: build.iconic('folder') + 'Move', fn: () => { basicContext.close(); contextMenu.move([photoID], e) } },
+			{ type: 'item', title: build.iconic('trash') + 'Delete', fn: () => photo.delete([photoID]) }
+		]
+	}
+	else if (lychee.role == 'user') {
+		items = [
+			{ type: 'item', title: build.iconic('star') + 'Star', fn: () => photo.setStar([photoID]) },
+			{ type: 'item', title: build.iconic('tag') + 'Tags', fn: () => photo.editTags([photoID]) },
+			{ type: 'separator' },
+			{ type: 'item', title: build.iconic('pencil') + 'Rename', fn: () => photo.setTitle([photoID]) },
+			{ type: 'item', title: build.iconic('layers') + 'Duplicate', fn: () => photo.duplicate([photoID]) }
+		]
+		
+		if(album.json.erase == 1) {
+			items.unshift({ type: 'item', title: build.iconic('trash') + 'Delete', fn: () => photo.delete([photoID]) })
+		}
+	}
 
 	$('.photo[data-id="' + photoID + '"]').addClass('active')
 

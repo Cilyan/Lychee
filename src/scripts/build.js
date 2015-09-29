@@ -83,6 +83,8 @@ build.photo = function(data) {
 	let html = ''
 
 	let { path: thumbPath, hasRetina: thumbRetina } = lychee.retinize(data.thumbUrl)
+	
+	console.log(data)
 
 	html += lychee.html`
 	        <div class='photo' data-album-id='$${ data.album }' data-id='$${ data.id }'>
@@ -241,7 +243,7 @@ build.usersModal = function(title, users) {
 		i		= 0,
 		file	= null;
 
-	html =	`
+	html = `
 			<h1>${ title }</h1>
 			<div class='rows'>
 			`
@@ -250,35 +252,36 @@ build.usersModal = function(title, users) {
 
 		user = users[i];
 
-		if (user.name.length>40) user.name = user.name.substr(0, 17) + '...' + user.name.substr(user.name.length-20, 20);
+		if (user.name.length>40) user.name = user.name.substr(0, 17) + '...' + user.name.substr(user.name.length-20, 20)
 
 
-    var roleCapitilized = user.role.charAt(0).toUpperCase() + user.role.slice(1);
-    var admin = user.role == "admin";
-    if (admin){
-        html +=	`
-            <div class='row'>
-            `
-    }else{
-        html +=	`
-            <div class='row selectable' onclick='users.manageUser("${ user.name }", "${ user.id }")'>
-            `
-    }
+		let roleCapitilized = user.role.charAt(0).toUpperCase() + user.role.slice(1)
+		let admin = user.role == "admin"
+		
+		if (admin){
+			html += `
+			    <div class='row'>
+			    `
+		}else{
+			html += `
+			    <div class='row selectable' onclick='users.manageUser("${ user.name }", "${ user.id }")'>
+			    `
+		}
 
-		html +=	`
-					<a class='name'>${ lychee.escapeHTML(user.name) }</a>
-          <a class='role'>${ roleCapitilized }</a>
-          <a class='trash' onclick='users.deleteUser("${ user.name }");event.cancelBubble=true;'>Delete</a>
-        </div>
-    `
+		html += `
+		        <a class='name'>${ lychee.escapeHTML(user.name) }</a>
+		        <a class='role'>${ roleCapitilized }</a>
+		        <a class='trash' onclick='users.deleteUser("${ user.name }");event.cancelBubble=true;'>Delete</a>
+		    </div>
+		    `
 
-		i++;
+		i++
 
 	}
 
-	html +=	'</div>';
+	html += '</div>'
 
-	return html;
+	return html
 
 }
 
@@ -287,65 +290,64 @@ build.userModal = function(title, userid,  albums) {
 	var html	= '',
 		i		= 0,
 
-	html =	`
-			<h1>${ title }</h1>
-			<div class='rows'>
-			`
+	html = `
+	    <h1>${ title }</h1>
+	    <div class='rows'>
+	    `
 
 	while (i<albums.length) {
 
-		var album = albums[i];
-    var albumid = album.id;
+		let album = albums[i];
+		let albumid = album.id;
 
-		if (album.title.length>40) album.title = album.title.substr(0, 17) + '...' + album.title.substr(album.title.length-20, 20);
+		if (album.title.length>40) album.title = album.title.substr(0, 17) + '...' + album.title.substr(album.title.length-20, 20)
 
-		html +=	`
-				<div class='row'>
-    `
-    /*
-    if(album.thumbs.length > 0){
-      html += `<img class='thumbnail' src='${ album.thumbs[0]}'></img>`;
-      html += `<span class='thumbnail'>&nbsp;</span>`;
-    }
-*/
-    var view = album.view == '1' ? 'checked' : '';
-    var upload = album.upload == '1' ? 'checked' : '';
-    var erase = album.erase == '1' ? 'checked' : '';
+		html += `
+		    <div class='row'>
+		    `
+		/*
+		if(album.thumbs.length > 0){
+			html += `<img class='thumbnail' src='${ album.thumbs[0]}'></img>`
+			html += `<span class='thumbnail'>&nbsp;</span>`
+		}
+		*/
+		let view = album.view == '1' ? 'checked' : ''
+		let upload = album.upload == '1' ? 'checked' : ''
+		let erase = album.erase == '1' ? 'checked' : ''
 
-    html += `
-					<a class='name title'>${ lychee.escapeHTML(album.title) }</a>
-				  <form>
-					  <div class='choice rowchoice'>
-						  <label>
-							  <input ${ view } type='checkbox' name='visible' onclick='users.changePrivileges(${ userid }, ${ albumid }, 0, this.checked)'>
-							  <span class='checkbox'>${ build.iconic('check') }</span>
-							  <span class='label'>View</span>
-						  </label>
-            </div>
-					  <div class='choice rowchoice'>
-						  <label>
-							  <input ${ upload } type='checkbox' name='visible' onclick='users.changePrivileges(${ userid }, ${ albumid }, 1, this.checked)'>
-							  <span class='checkbox'>${ build.iconic('check') }</span>
-							  <span class='label'>Upload</span>
-						  </label>
-            </div>
-					  <div class='choice rowchoice'>
-						  <label>
-							  <input ${ erase } type='checkbox' name='visible' onclick='users.changePrivileges(${ userid }, ${ albumid }, 2, this.checked)'>
-							  <span class='checkbox'>${ build.iconic('check') }</span>
-							  <span class='label'>Delete</span>
-						  </label>
-            </div>
-          </form>
-
-          </div>
-    `
+		html += `
+		        <a class='name title'>${ lychee.escapeHTML(album.title) }</a>
+		        <form>
+		          <div class='choice rowchoice'>
+		            <label>
+		                <input ${ view } type='checkbox' name='visible' onclick='users.changePrivileges(${ userid }, ${ albumid }, 0, this.checked)'>
+		                <span class='checkbox'>${ build.iconic('check') }</span>
+		                <span class='label'>View</span>
+		            </label>
+		          </div>
+		          <div class='choice rowchoice'>
+		            <label>
+		              <input ${ upload } type='checkbox' name='visible' onclick='users.changePrivileges(${ userid }, ${ albumid }, 1, this.checked)'>
+		              <span class='checkbox'>${ build.iconic('check') }</span>
+		              <span class='label'>Upload</span>
+		            </label>
+		          </div>
+		          <div class='choice rowchoice'>
+		            <label>
+		              <input ${ erase } type='checkbox' name='visible' onclick='users.changePrivileges(${ userid }, ${ albumid }, 2, this.checked)'>
+		              <span class='checkbox'>${ build.iconic('check') }</span>
+		              <span class='label'>Delete</span>
+		            </label>
+		          </div>
+		        </form>
+		    </div>
+		    `
 
 		i++;
 
 	}
 
-	html +=	'</div>';
+	html += '</div>';
 
 	return html;
 
